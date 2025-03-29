@@ -70,8 +70,3 @@ input{
 #navbar div{
     animation: fadeIn 0.5s ease-in-out;
 }
-
-.title{
-    text-shadow: #3f3f3f 0px 0px 5px, #3f3f3f 0px 0px 10px, #3f3f3f 0px 0px 15px, #3f3f3f 0px 0px 20px, #3f3f3f 0px 0px 25px, #3f3f3f 0px 0px 30px, #3f3f3f 0px 0px 35px;
-    filter: blur(0px) brightness(0.9);
-}
