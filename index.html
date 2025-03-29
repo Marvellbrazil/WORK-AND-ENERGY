@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Work and Energy</title>
+    <link rel="shortcut icon" href="img/prism.png" type="image/x-icon">
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            margin: 140px 0;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.5) rgba(75, 75, 75, 0.5);
+        }
+
+        img{
+            width: 30px;
+            height: 30px;
+            margin-right: 20px;
+        }
+
+        #start-button, #github-button {
+            margin: 5px 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            background-color: rgba(75, 75, 75, 0.5);
+            color: white;
+            border: 2px solid rgba(75, 75, 75, 0.5);
+            transition-duration: 0.25s;
+        }
+
+        #start-button:hover, #github-button:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            border: 2px solid black;
+            .arrow {
+                filter: invert(0);
+            }
+            transition-duration: 0.25s;
+        }
+
+        .arrow{
+            filter: invert(1);
+        }
+        
+        .des-img{
+            width: 215px;
+            height: 215px;
+            opacity: 0.9;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-md text-center">
+        <h2 id="question">What is work in physics?</h2><br><br><br>
+        <h1>Welcome to <span style="text-decoration: underline;">workandenergy.io</span></h1><br>
+        <h4 style="text-align: justify;">workandenergy.io, a platform dedicated to helping you understand and calculate key physics concepts like work and energy. We simplify the principles of work—energy transfer through force over distance—and energy—the ability to do work. Our site allows you to input data and get instant calculations for various physical scenarios, whether you're a student or professional. With a focus on mechanical, kinetic, potential, and electrical energy, workandenergy.io makes learning and applying these concepts easier and more accessible.</h4>
+        <br><br><br>
+        <h4>Click the 'Start' button below to start using the app</h4><br>
+        <h4>Or you can check out the source code on GitHub</h4><br>
+        <a href="main.html" class="btn btn-primary" id="start-button"><img class="arrow" src="img/up-right-arrow.png" alt="">Start</a>
+        <a href="https://github.com/marvellbrazil" target="_blank" class="btn btn-primary" id="github-button"><img class="arrow" src="img/up-right-arrow.png" alt="">Visit GitHub</a>
+        <br>
+        <img style="right: 375px; top: -150px;" class="des-img" src="img/gravity-white.png" alt="apple.png">
+        <img style="top: 20px; left: 20px; transform: rotate(-20deg);" class="des-img" src="img/speed.png" alt="bullet.png">
+        <img style="left: 365px; top: -180px; transform: rotate(30deg);" class="des-img" src="img/airplane.png" alt="paperplane.png">
+    </div>
+    <script>
+        let question = document.getElementById('question');
+
+        setInterval(() => {
+            let questions = [
+                "What is work in physics?",
+                "What is energy in physics?",
+                "How to calculate potential energy?",
+                "How to calculate force?",
+                "What is the unit of work?",
+                "What is the unit of energy?",
+                "What is kinetic energy?",
+                "What is potential energy?",
+                "What is mechanical energy?",
+                "Does newton and joule the same?"
+            ];
+            let i = Math.floor(Math.random() * questions.length);
+
+            question.innerHTML = question.innerHTML = questions[i];
+        }, 1300);
+    </script>
+</body>
+</html>

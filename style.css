@@ -1,0 +1,77 @@
+body{
+    position: relative;
+    margin: 4dvh 0 4dvh 0;
+    animation-name: startUp;
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+    z-index: 1;
+    background-color: #121212;
+    color: white;
+}
+
+input[type="text"]{
+    background-color: #191919;
+    color: white;
+    border: 1px solid #121212;
+    border-radius: 5px;
+    padding: 0.5dvh 0.5dvh 0.5dvh 0.5dvh;
+    font-size: 2dvh;
+}
+
+input:focus{
+    outline: none;
+    border: 1px solid #3f3f3f;
+    background-color: #191919;
+}
+
+h2{
+    margin: 4dvh 0 4dvh 0;
+    font-size: 150%;
+}
+
+body::-webkit-scrollbar{
+    display: none;
+}
+
+input{
+    text-align: center;
+    height: 110%;
+    width: 28dvh;
+}
+
+#navbar div:first-child,
+#navbar div:nth-child(2),
+#navbar div:nth-child(3),
+#navbar div:nth-child(4){
+    position: relative;
+    margin: 10px 0 0 0;
+    font-size: 2dvh;
+    transition: 0.25s;
+}
+
+#navbar div:hover{
+    cursor: pointer;
+    transition: 0.25s;
+    text-shadow: 0 0 5px #3f3f3f, 0 0 10px #3f3f3f, 0 0 15px #3f3f3f, 0 0 20px #3f3f3f, 0 0 25px #3f3f3f, 0 0 30px #3f3f3f, 0 0 35px #3f3f3f;
+    filter: blur(0px) brightness(1.2);
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes startUp {
+    0% { filter: blur(100px); }
+    100% { filter: blur(0); }
+}
+
+#navbar div{
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.title{
+    text-shadow: #3f3f3f 0px 0px 5px, #3f3f3f 0px 0px 10px, #3f3f3f 0px 0px 15px, #3f3f3f 0px 0px 20px, #3f3f3f 0px 0px 25px, #3f3f3f 0px 0px 30px, #3f3f3f 0px 0px 35px;
+    filter: blur(0px) brightness(0.9);
+}
