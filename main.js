@@ -54,7 +54,7 @@ const g = 10;
 function energies(){
     potential.value = formatNumberWithDots(mass.value * g * height.value);
     kinetical.value = formatNumberWithDots(0.5 * mass.value * Math.pow(velocity.value, 2));
-    mechanical.value = formatNumberWithDots(Math.abs(potential.value) + Math.abs(kinetical.value));
+    mechanical.value = formatNumberWithDots(Math.abs(potential.value + kinetical.value));
 }
 
 function works(){
