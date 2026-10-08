@@ -8,86 +8,286 @@
     <link rel="shortcut icon" href="img/prism.png" type="image/x-icon">
     <style>
         body {
+            box-sizing: border-box;
             background-color: #121212;
             color: white;
-            margin: 140px 0;
-            scrollbar-color: rgba(255, 255, 255, 0.5) rgba(75, 75, 75, 0.5);
+            color-scheme: dark;
+            margin: 0;
+            min-height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: clamp(1rem, 4dvh, 2.5rem) 1rem;
         }
 
-        img{
-            width: 30px;
-            height: 30px;
-            margin-right: 20px;
+        .landing {
+            position: relative;
+            isolation: isolate;
+            width: 100%;
+            max-width: 72rem;
+            min-height: min(38rem, 88dvh);
+            padding: 5rem 9rem;
+            text-align: center;
+            display: grid;
+            align-content: center;
+            justify-items: center;
+            gap: clamp(1rem, 3dvh, 1.75rem);
+        }
+
+        #question {
+            margin: 0;
+            min-height: 2.6em;
+            display: grid;
+            align-items: center;
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: #bdbdbd;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.65rem, 5vw, 3.5rem);
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+
+        h1 span {
+            display: block;
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 0.15em;
+        }
+
+        .description {
+            margin: 0;
+            max-width: 38rem;
+            color: #d0d0d0;
+            font-size: clamp(1rem, 2vw, 1.125rem);
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
 
         #start-button, #github-button {
-            margin: 5px 10px;
-            padding: 10px 20px;
-            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            min-height: 52px;
+            padding: 0.875rem 1.375rem;
+            font-size: 1rem;
             font-weight: 600;
-            background-color: rgba(75, 75, 75, 0.5);
-            color: white;
-            border: 2px solid rgba(75, 75, 75, 0.5);
-            transition-duration: 0.25s;
+            line-height: 1.25;
+            border-radius: 0.625rem;
+            border: 1px solid #626262;
+            text-decoration: none;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
         }
 
-        #start-button:hover, #github-button:hover {
-            background-color: rgba(255, 255, 255, 0.8);
-            color: black;
-            border: 2px solid black;
-            .arrow {
-                filter: invert(0);
+        #start-button {
+            background-color: #ffffff;
+            color: #121212;
+            border-color: #ffffff;
+        }
+
+        #github-button {
+            background-color: #1c1c1c;
+            color: #ffffff;
+        }
+
+        #start-button:hover {
+            background-color: #e3e3e3;
+            border-color: #e3e3e3;
+            transform: translateY(-2px);
+        }
+
+        #github-button:hover {
+            background-color: #303030;
+            border-color: #a0a0a0;
+            transform: translateY(-2px);
+        }
+
+        #start-button:active, #github-button:active {
+            transform: translateY(0);
+        }
+
+        a:focus-visible {
+            outline: 2px solid white;
+            outline-offset: 4px;
+        }
+
+        .arrow {
+            width: 18px;
+            height: 18px;
+        }
+
+        .github-icon {
+            width: 21px;
+            height: 21px;
+            flex-shrink: 0;
+        }
+
+        .illustrations {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .des-img {
+            position: absolute;
+            width: clamp(64px, 13dvh, 120px);
+            height: auto;
+            opacity: 0.85;
+        }
+
+        .gravity {
+            top: 2rem;
+            left: 2rem;
+            transform: rotate(-18deg);
+        }
+
+        .speed {
+            top: 40%;
+            right: 2rem;
+            transform: rotate(-22deg);
+        }
+
+        .airplane {
+            bottom: 2rem;
+            left: 3rem;
+            transform: rotate(24deg);
+        }
+
+        @media (max-width: 991px) {
+            .landing {
+                padding-left: 6rem;
+                padding-right: 6rem;
             }
-            transition-duration: 0.25s;
+
+            .des-img {
+                width: clamp(56px, 10vw, 88px);
+            }
+
+            .gravity {
+                left: 1rem;
+            }
+
+            .speed {
+                right: 1rem;
+            }
+
+            .airplane {
+                left: 1.5rem;
+            }
         }
 
-        .arrow{
-            filter: invert(1);
+        @media (max-width: 575px) {
+            .landing {
+                min-height: 0;
+                padding: 4.5rem 0.25rem 5rem;
+                gap: 1rem;
+            }
+
+            .des-img {
+                width: 52px;
+                opacity: 0.75;
+            }
+
+            .gravity {
+                top: 0.75rem;
+                left: 1rem;
+            }
+
+            .speed {
+                top: auto;
+                right: 1rem;
+                bottom: 0.75rem;
+            }
+
+            .airplane {
+                left: 1rem;
+                bottom: 0.75rem;
+            }
+
+            .actions {
+                gap: 0.625rem;
+            }
+
+            #start-button, #github-button {
+                padding-left: 1rem;
+                padding-right: 1rem;
+                font-size: 0.875rem;
+            }
         }
-        
-        .des-img{
-            width: 215px;
-            height: 215px;
-            opacity: 0.9;
-            position: relative;
+
+        @media (max-height: 600px) {
+            body {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .landing {
+                min-height: 0;
+                padding: 1rem 0.25rem;
+                gap: 0.75rem;
+            }
+
+            h1 {
+                font-size: clamp(1.5rem, 4vw, 2.5rem);
+            }
+
+            .illustrations {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #start-button, #github-button {
+                transition: none;
+                transform: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container-md text-center">
-        <h2 id="question">What is work in physics?</h2><br><br><br>
-        <h1>Welcome to <span style="text-decoration: underline;">workandenergy.io</span></h1><br>
-        <h4 style="text-align: justify;">workandenergy.io, a platform dedicated to helping you understand and calculate key physics concepts like work and energy. We simplify the principles of work—energy transfer through force over distance—and energy—the ability to do work. Our site allows you to input data and get instant calculations for various physical scenarios, whether you're a student or professional. With a focus on mechanical, kinetic, potential, and electrical energy, workandenergy.io makes learning and applying these concepts easier and more accessible.</h4>
-        <br><br><br>
-        <h4>Click the 'Start' button below to start using the app</h4><br>
-        <h4>Or you can check out the source code on GitHub</h4><br>
-        <a href="main.html" class="btn btn-primary" id="start-button"><img class="arrow" src="img/up-right-arrow.png" alt="">Start</a>
-        <a href="https://github.com/marvellbrazil" target="_blank" class="btn btn-primary" id="github-button"><img class="arrow" src="img/up-right-arrow.png" alt="">Visit GitHub</a>
-        <br>
-        <img style="right: 375px; top: -150px;" class="des-img" src="img/gravity-white.png" alt="apple.png">
-        <img style="top: 20px; left: 20px; transform: rotate(-20deg);" class="des-img" src="img/speed.png" alt="bullet.png">
-        <img style="left: 365px; top: -180px; transform: rotate(30deg);" class="des-img" src="img/airplane.png" alt="paperplane.png">
-    </div>
+    <main class="landing">
+        <h2 id="question">What is work in physics?</h2>
+        <h1>Welcome to <span>workandenergy.io</span></h1>
+        <p class="description">Calculate potential, kinetic, and mechanical energy, force, and work. Enter the values you know and check the formulas as you go.</p>
+        <div class="actions">
+            <a href="main.html" class="btn" id="start-button">Open calculator<img class="arrow" src="img/up-right-arrow.png" alt=""></a>
+            <a href="https://github.com/marvellbrazil" target="_blank" rel="noopener noreferrer" class="btn" id="github-button"><svg class="github-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.793 23.384c.6.111.82-.261.82-.577 0-.285-.01-1.04-.016-2.04-3.338.725-4.043-1.61-4.043-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.085 1.838 1.237 1.838 1.237 1.071 1.835 2.809 1.305 3.494.998.108-.776.419-1.305.762-1.605-2.665-.303-5.467-1.333-5.467-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.51 11.51 0 0 1 12 6.299c1.02.005 2.047.138 3.005.404 2.291-1.552 3.297-1.23 3.297-1.23.655 1.652.243 2.873.12 3.176.77.84 1.235 1.911 1.235 3.221 0 4.61-2.807 5.625-5.479 5.921.431.372.815 1.102.815 2.222 0 1.606-.014 2.898-.014 3.293 0 .319.216.694.825.576A12.001 12.001 0 0 0 12 .5Z"/></svg>Visit GitHub</a>
+        </div>
+        <div class="illustrations" aria-hidden="true">
+            <img class="des-img gravity" src="img/gravity-white.png" alt="">
+            <img class="des-img speed" src="img/speed.png" alt="">
+            <img class="des-img airplane" src="img/airplane.png" alt="">
+        </div>
+    </main>
     <script>
-        let question = document.getElementById('question');
+        const question = document.getElementById('question');
+        const questions = [
+            "What is work in physics?",
+            "What is energy in physics?",
+            "How to calculate potential energy?",
+            "How to calculate force?",
+            "What is the unit of work?",
+            "What is the unit of energy?",
+            "What is kinetic energy?",
+            "What is potential energy?",
+            "What is mechanical energy?",
+            "Are newtons and joules the same?"
+        ];
 
-        setInterval(() => {
-            let questions = [
-                "What is work in physics?",
-                "What is energy in physics?",
-                "How to calculate potential energy?",
-                "How to calculate force?",
-                "What is the unit of work?",
-                "What is the unit of energy?",
-                "What is kinetic energy?",
-                "What is potential energy?",
-                "What is mechanical energy?",
-                "Does newton and joule the same?"
-            ];
-            let i = Math.floor(Math.random() * questions.length);
-
-            question.innerHTML = question.innerHTML = questions[i];
-        }, 1300);
+        if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+            setInterval(() => {
+                question.textContent = questions[Math.floor(Math.random() * questions.length)];
+            }, 1300);
+        }
     </script>
 </body>
 </html>
