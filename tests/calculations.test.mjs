@@ -13,7 +13,8 @@ const outputIds = ['potential', 'kinetical', 'mechanical', 'force', 'work'];
 function createCalculator(values = {}) {
     const bodyListeners = new Map();
     const elements = Object.fromEntries([...Object.keys(inputIds), ...outputIds, 'mode'].map(id => [id, {
-        value: '', tagName: 'INPUT', type: 'text', style: {}, attributes: {},
+        value: '', tagName: 'INPUT', type: 'text', style: {}, attributes: {}, selectionStart: 0, selectionEnd: 0,
+        setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; },
         setAttribute(name, value) { this.attributes[name] = String(value); },
         getAttribute(name) { return this.attributes[name] ?? null; },
         innerHTML: id === 'mode' ? 'Light' : '', validationMessage: '', reportedValidation: '', listeners: new Map(),
@@ -34,15 +35,18 @@ function createCalculator(values = {}) {
         }
     });
     runInContext(source, context);
-    for (const [id, value] of Object.entries(values)) elements[id].value = String(value);
+    for (const [id, value] of Object.entries(values)) elements[id].value = String(value).replace('.', ',');
     return {
         elements,
         body: context.document.body,
         clickMode() { elements.mode.listeners.get('click')?.(); },
+        formatInput(field) { context.field = field; runInContext('formatInput(field)', context); },
         calculate() { runInContext('energies(); works();', context); },
         blur(id) { elements[id].listeners.get('blur')?.(); },
         edit(id, value) {
-            elements[id].value = String(value);
+            elements[id].value = typeof value === 'number' ? String(value).replace('.', ',') : value;
+            elements[id].selectionStart = elements[id].value.length;
+            elements[id].selectionEnd = elements[id].value.length;
             runInContext(`input('${inputIds[id]}')`, context);
             bodyListeners.get('input')?.({ target: elements[id] });
         }
@@ -52,8 +56,8 @@ function createCalculator(values = {}) {
 for (const fixture of [
     { name: 'mechanical energy adds numeric energies', inputs: { mass: 2, height: 1, velocity: 2 }, output: 'mechanical', expected: '24' },
     { name: 'mechanical energy preserves a negative total', inputs: { mass: 2, height: -1, velocity: 2 }, output: 'mechanical', expected: '-16' },
-    { name: 'work uses unformatted force', inputs: { mass: 1500, acceleration: 1, distance: 2 }, output: 'work', expected: '3,000' },
-    { name: 'mechanical energy uses unrounded energies', inputs: { mass: 2, height: 0.00002, velocity: 0.02 }, output: 'mechanical', expected: '0.001' },
+    { name: 'work uses unformatted force', inputs: { mass: 1500, acceleration: 1, distance: 2 }, output: 'work', expected: '3.000' },
+    { name: 'mechanical energy uses unrounded energies', inputs: { mass: 2, height: 0.00002, velocity: 0.02 }, output: 'mechanical', expected: '0,001' },
     { name: 'work uses unrounded force', inputs: { mass: 1, acceleration: 0.0004, distance: 10000 }, output: 'work', expected: '4' },
     { name: 'missing mass leaves potential energy unavailable', inputs: { height: 1 }, output: 'potential', expected: '' },
     { name: 'explicit zero mass produces zero potential energy', inputs: { mass: 0, height: 1 }, output: 'potential', expected: '0' },
@@ -74,21 +78,21 @@ for (const fixture of [
 test('derived mass stays numeric above one thousand', () => {
     const calculator = createCalculator({ volume: 1, height: 1 });
     calculator.edit('density', 1500);
-    assert.equal(calculator.elements.mass.value, '1500');
-    assert.equal(calculator.elements.potential.value, '15000');
+    assert.equal(calculator.elements.mass.value, '1.500');
+    assert.equal(calculator.elements.potential.value, '15.000');
 });
 
 test('derived values preserve full precision', () => {
     const calculator = createCalculator({ density: 1, height: 10000 });
     calculator.edit('volume', 0.0004);
-    assert.equal(calculator.elements.mass.value, '0.0004');
+    assert.equal(calculator.elements.mass.value, '0,0004');
     assert.equal(calculator.elements.potential.value, '40');
 });
 
 test('decimal inputs are not stripped after recalculation', () => {
     const calculator = createCalculator({ height: 1 });
-    calculator.edit('mass', '0.5');
-    assert.equal(calculator.elements.mass.value, '0.5');
+    calculator.edit('mass', '0,5');
+    assert.equal(calculator.elements.mass.value, '0,5');
     assert.equal(calculator.elements.potential.value, '5');
 });
 
@@ -236,11 +240,11 @@ test('invalid numeric input reports its validation error on blur', () => {
 
 test('manual energies calculate mechanical energy without mass', () => {
     const calculator = createCalculator();
-    calculator.edit('potential', '1500.5');
-    calculator.edit('kinetical', '20.25');
-    assert.equal(calculator.elements.potential.value, '1500.5');
-    assert.equal(calculator.elements.kinetical.value, '20.25');
-    assert.equal(calculator.elements.mechanical.value, '1,520.75');
+    calculator.edit('potential', '1.500,5');
+    calculator.edit('kinetical', '20,25');
+    assert.equal(calculator.elements.potential.value, '1.500,5');
+    assert.equal(calculator.elements.kinetical.value, '20,25');
+    assert.equal(calculator.elements.mechanical.value, '1.520,75');
 });
 
 test('manual potential clears height sources but preserves work and kinetic inputs', () => {
@@ -332,8 +336,8 @@ test('negative manual potential and zero kinetic energy are valid', () => {
 test('editable computed energies retain precision', () => {
     const calculator = createCalculator({ mass: 2, height: 0.00002, velocity: 0.02 });
     calculator.calculate();
-    assert.equal(calculator.elements.potential.value, '0.0004');
-    assert.equal(calculator.elements.kinetical.value, '0.0004');
+    assert.equal(calculator.elements.potential.value, '0,0004');
+    assert.equal(calculator.elements.kinetical.value, '0,0004');
 });
 
 test('theme button switches from dark to light and back without text coupling', () => {
@@ -345,6 +349,78 @@ test('theme button switches from dark to light and back without text coupling', 
     assert.equal(calculator.body.getAttribute('data-theme'), 'dark');
     assert.equal(calculator.elements.mode.getAttribute('aria-label'), 'Switch to light mode');
 });
+
+for (const [value, expected] of [['200', '200'], ['2000', '2.000'], ['20000', '20.000'], ['2000000', '2.000.000'], ['20000,50', '20.000,50']]) {
+    test(`typing ${value} formats thousands without changing calculation`, () => {
+        const calculator = createCalculator({ height: 1 });
+        calculator.edit('mass', value);
+        assert.equal(calculator.elements.mass.value, expected);
+        assert.equal(calculator.elements.mass.selectionStart, expected.length);
+        assert.equal(calculator.elements.potential.value, value === '20000,50' ? '200.005' : ({ '200': '2.000', '2000': '20.000', '20000': '200.000', '2000000': '20.000.000' })[value]);
+    });
+}
+
+test('editing the middle of a grouped number preserves selection position', () => {
+    const calculator = createCalculator({ height: 1 });
+    const field = calculator.elements.mass;
+    field.value = '20.9000';
+    field.selectionStart = 4;
+    field.selectionEnd = 4;
+    calculator.formatInput(field);
+    assert.equal(field.value, '209.000');
+    assert.equal(field.selectionStart, 3);
+});
+
+test('editing one group in a million-value input regroups the full number', () => {
+    const calculator = createCalculator({ height: 1 });
+    calculator.edit('mass', '2.000.0000');
+    assert.equal(calculator.elements.mass.value, '20.000.000');
+    assert.equal(calculator.elements.potential.value, '200.000.000');
+});
+
+test('deleting a thousands separator does not trap the caret', () => {
+    const calculator = createCalculator();
+    const field = calculator.elements.mass;
+    field.value = '20000';
+    field.selectionStart = 2;
+    field.selectionEnd = 2;
+    calculator.formatInput(field);
+    assert.equal(field.value, '20.000');
+    assert.equal(field.selectionStart, 2);
+});
+
+test('grouped decimal mass is parsed as a number not a decimal fraction', () => {
+    const calculator = createCalculator({ height: 1 });
+    calculator.edit('mass', '20.000,5');
+    assert.equal(calculator.elements.potential.value, '200.005');
+});
+
+test('incomplete decimal entry retains its trailing comma', () => {
+    const calculator = createCalculator({ height: 1 });
+    calculator.edit('mass', '20000,');
+    assert.equal(calculator.elements.mass.value, '20.000,');
+    assert.equal(calculator.elements.potential.value, '200.000');
+});
+
+test('selection spanning a separator stays attached to the same digits', () => {
+    const calculator = createCalculator();
+    const field = calculator.elements.mass;
+    field.value = '-20900,50';
+    field.selectionStart = 2;
+    field.selectionEnd = 5;
+    calculator.formatInput(field);
+    assert.equal(field.value, '-20.900,50');
+    assert.equal(field.selectionStart, 2);
+    assert.equal(field.selectionEnd, 6);
+});
+
+for (const id of Object.keys(inputIds)) {
+    test(`${id} supports live thousands formatting`, () => {
+        const calculator = createCalculator();
+        calculator.edit(id, '20000');
+        assert.equal(calculator.elements[id].value, '20.000');
+    });
+}
 
 test('derived overflow clears mass rather than displaying infinity', () => {
     const calculator = createCalculator({ volume: 10, height: 1 });

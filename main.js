@@ -49,9 +49,9 @@ function readNumber(field){
     field.setCustomValidity('');
     if(value === '') return null;
 
-    const number = Number(value);
-    if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value) || !Number.isFinite(number)){
-        field.setCustomValidity('Enter a finite decimal number.');
+    const number = Number(value.replace(/\./g, '').replace(',', '.'));
+    if(!/^[+-]?(?:(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d*)?|,\d+)(?:[eE][+-]?\d+)?$/.test(value) || !Number.isFinite(number)){
+        field.setCustomValidity('Use dots for thousands and a comma for decimals.');
         return null;
     }
     if(field === time && number <= 0){
@@ -72,8 +72,34 @@ function readNumber(field){
     });
 });
 
+function formatInput(field){
+    const value = field.value;
+    if(!/^[+-]?[\d.]*(?:,\d*)?$/.test(value)) return;
+    const groups = value.split(',')[0].replace(/^[+-]/, '').split('.');
+    if(groups.length > 2 && groups.slice(1).filter(group => group.length !== 3).length > 1) return;
+    const [integer, fraction] = value.split(',');
+    const digits = integer.replace(/\./g, '');
+    const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formatted = grouped + (fraction !== undefined ? ',' + fraction : '');
+    const start = field.selectionStart;
+    const end = field.selectionEnd;
+    const mapPosition = position => {
+        if(position === null) return formatted.length;
+        const count = value.slice(0, position).replace(/\./g, '').length;
+        let consumed = 0;
+        let index = 0;
+        while(index < formatted.length && consumed < count){
+            if(formatted[index] !== '.') consumed++;
+            index++;
+        }
+        return index;
+    };
+    field.value = formatted;
+    field.setSelectionRange(mapPosition(start), mapPosition(end));
+}
+
 function setDerivedValue(field, value){
-    field.value = value !== null && Number.isFinite(value) ? String(value) : '';
+    field.value = value !== null && Number.isFinite(value) ? value.toLocaleString('id-ID', { maximumSignificantDigits: 17 }) : '';
     field.setCustomValidity('');
 }
 
@@ -105,6 +131,8 @@ function works(){
 }
 
 function input(id){
+    const fields = { de: density, vo: volume, ma: mass, mh: maxHeight, di: distance, h: height, ve: velocity, t: time, a: acceleration, p: potential, k: kinetical };
+    if(fields[id]) formatInput(fields[id]);
     if(['de', 'vo', 'ma', 'mh', 'h'].includes(id) || (id === 'di' && maxHeight.value.trim() !== '')) manualPotential = false;
     if(['de', 'vo', 'ma', 've', 't'].includes(id)) manualKinetic = false;
 
@@ -152,5 +180,5 @@ function mode(){
 
 //Number Formatting Function : 
 function formatNumber(number) {
-    return number !== null && Number.isFinite(number) ? number.toLocaleString('en-US') : '';
+    return number !== null && Number.isFinite(number) ? number.toLocaleString('id-ID') : '';
 }
