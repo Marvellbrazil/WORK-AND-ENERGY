@@ -1,10 +1,3 @@
-document.body.addEventListener('input', function (e) {
-    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
-        let value = e.target.value;
-        e.target.value = value.replace(/[^0-9]/, '');
-    }
-});
-
 function linktblank(link){
     window.open(link);
 }
@@ -51,95 +44,113 @@ const g = 10;
 //     return "Do you want to leave this site?";
 // }
 
+function readNumber(field){
+    const value = field.value.trim();
+    field.setCustomValidity('');
+    if(value === '') return null;
+
+    const number = Number(value);
+    if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value) || !Number.isFinite(number)){
+        field.setCustomValidity('Enter a finite decimal number.');
+        return null;
+    }
+    if(field === time && number <= 0){
+        field.setCustomValidity('Time must be greater than zero.');
+        return null;
+    }
+    if([density, volume, mass, distance, kinetical].includes(field) && number < 0){
+        field.setCustomValidity('Enter zero or a positive number.');
+        return null;
+    }
+    return number;
+}
+
+[density, volume, mass, maxHeight, distance, height, velocity, time, acceleration, potential, kinetical].forEach(field => {
+    field.addEventListener('blur', () => {
+        readNumber(field);
+        field.reportValidity();
+    });
+});
+
+function setDerivedValue(field, value){
+    field.value = value !== null && Number.isFinite(value) ? String(value) : '';
+    field.setCustomValidity('');
+}
+
+let manualPotential = false;
+let manualKinetic = false;
+
 function energies(){
-    potential.value = formatNumberWithDots(mass.value * g * height.value);
-    kinetical.value = formatNumberWithDots(0.5 * mass.value * Math.pow(velocity.value, 2));
-    mechanical.value = formatNumberWithDots(Math.abs(potential.value + kinetical.value));
+    const massValue = readNumber(mass);
+    const heightValue = readNumber(height);
+    const velocityValue = readNumber(velocity);
+    const potentialValue = manualPotential ? readNumber(potential) : massValue !== null && heightValue !== null ? massValue * g * heightValue : null;
+    const kineticValue = manualKinetic ? readNumber(kinetical) : massValue !== null && velocityValue !== null ? 0.5 * massValue * Math.pow(velocityValue, 2) : null;
+    const mechanicalValue = potentialValue !== null && kineticValue !== null ? potentialValue + kineticValue : null;
+
+    if(!manualPotential) setDerivedValue(potential, potentialValue);
+    if(!manualKinetic) setDerivedValue(kinetical, kineticValue);
+    mechanical.value = formatNumber(mechanicalValue);
 }
 
 function works(){
-    force.value = formatNumberWithDots(mass.value * acceleration.value);
-    work.value = formatNumberWithDots(force.value * distance.value);
+    const massValue = readNumber(mass);
+    const accelerationValue = readNumber(acceleration);
+    const distanceValue = readNumber(distance);
+    const forceValue = massValue !== null && accelerationValue !== null ? massValue * accelerationValue : null;
+    const workValue = forceValue !== null && distanceValue !== null ? forceValue * distanceValue : null;
+
+    force.value = formatNumber(forceValue);
+    work.value = formatNumber(workValue);
 }
 
 function input(id){
-    if(id == 'de' || id == 'vo'){
-        const result = density.value * volume.value;
-        mass.value = formatNumberWithDots(result);
-        energies();
-        works();
-    } else if(id == 'ma'){
-        density.value = '';
-        volume.value = '';
-        energies();
-        works();
-    } else if(id == 'mh'){
-        const result = maxHeight.value - distance.value;
-        height.value = formatNumberWithDots(result);
-        energies();
-        works();
-    } else if(id == 'di'){
-        const result = maxHeight.value - distance.value;
-        height.value = formatNumberWithDots(result);
-        energies();
-        works();
-    } else if(id == 'h'){
-        maxHeight.value = '';
-        distance.value = '';
-        energies();
-        works();
-    } else if(id == 've' || id == 't'){
-        const acc = velocity.value / time.value;
-        acceleration.value = formatNumberWithDots(acc);
-        energies();
-        works();
-    } else if(id == 'a'){
-        velocity.value = '';
-        time.value = '';
-        energies();
-        works();
+    if(['de', 'vo', 'ma', 'mh', 'h'].includes(id) || (id === 'di' && maxHeight.value.trim() !== '')) manualPotential = false;
+    if(['de', 'vo', 'ma', 've', 't'].includes(id)) manualKinetic = false;
+
+    if(id === 'p'){
+        manualPotential = true;
+        setDerivedValue(height, null);
+        setDerivedValue(maxHeight, null);
+    } else if(id === 'k'){
+        manualKinetic = true;
+        setDerivedValue(velocity, null);
+        setDerivedValue(time, null);
+    } else if(id === 'de' || id === 'vo'){
+        const densityValue = readNumber(density);
+        const volumeValue = readNumber(volume);
+        setDerivedValue(mass, densityValue !== null && volumeValue !== null ? densityValue * volumeValue : null);
+    } else if(id === 'ma'){
+        setDerivedValue(density, null);
+        setDerivedValue(volume, null);
+    } else if(id === 'mh' || (id === 'di' && maxHeight.value.trim() !== '')){
+        const maxHeightValue = readNumber(maxHeight);
+        const distanceValue = readNumber(distance);
+        setDerivedValue(height, maxHeightValue !== null && distanceValue !== null ? maxHeightValue - distanceValue : null);
+    } else if(id === 'h'){
+        setDerivedValue(maxHeight, null);
+    } else if(id === 't' || (id === 've' && time.value.trim() !== '')){
+        const velocityValue = readNumber(velocity);
+        const timeValue = readNumber(time);
+        setDerivedValue(acceleration, velocityValue !== null && timeValue !== null ? velocityValue / timeValue : null);
+    } else if(id === 'a'){
+        setDerivedValue(time, null);
     }
+    energies();
+    works();
 }
 
-document.getElementById('mode').addEventListener('click', mode());
+document.getElementById('mode').addEventListener('click', mode);
 
 function mode(){
-    document.getElementById('mode').style.transition = "0.5s";
-
-    if(document.getElementById('mode').innerHTML == "Light"){
-        document.getElementById('mode').innerHTML = "Dark";
-        document.body.style.backgroundColor = "#121212";
-        document.body.style.color = "#ffffff";
-        document.querySelectorAll('.input').forEach(input => {
-            input.style.backgroundColor = "#424242";
-            input.style.color = "#ffffff";
-        });
-        document.querySelectorAll('.input').forEach(input => {
-            input.style.borderColor = "#ffffff";
-        });
-    } else {
-        document.getElementById('mode').innerHTML = "Light";
-        document.body.style.backgroundColor = "#ffffff";
-        document.body.style.color = "#000000";
-        document.querySelectorAll('.input').forEach(input => {
-            input.style.backgroundColor = "#ffffff";
-            input.style.color = "#000000";
-        });
-        document.querySelectorAll('.input').forEach(input => {
-            input.style.borderColor = "#000000";
-        });
-    }
-    document.querySelectorAll('.input').forEach(input => {
-        input.style.transition = "0.5s";
-    });
+    const nextTheme = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    const label = nextTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
+    document.body.setAttribute('data-theme', nextTheme);
+    document.getElementById('mode').setAttribute('aria-label', label);
+    document.getElementById('mode').setAttribute('title', label);
 }
 
 //Number Formatting Function : 
-function formatNumberWithDots(number) {
-    if (typeof number === 'number') {
-        let num = number.toLocaleString('en-US');
-        num = num.replace(/,/g, '.');
-        return num;
-    }
-    return number;
+function formatNumber(number) {
+    return number !== null && Number.isFinite(number) ? number.toLocaleString('en-US') : '';
 }
